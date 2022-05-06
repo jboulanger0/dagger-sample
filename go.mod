@@ -1,4 +1,4 @@
-module github.com/jobulanger0/dagger-sample
+module github.com/jboulanger0/dagger-sample
 
 go 1.18
 
