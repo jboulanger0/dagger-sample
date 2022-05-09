@@ -1,7 +1,7 @@
 package main
 
-import "fmt"
+import "github.com/jboulanger0/dagger-sample/pkg/printer"
 
 func main() {
-	fmt.Printf("cli: Hello command line !\n")
+	printer.Println("cli: Hello command line !")
 }
