@@ -3,7 +3,6 @@ package main
 import(
     "strings"
     "dagger.io/dagger"
-    "dagger.io/dagger/core"
     "github.com/jboulanger0/dagger-sample/ci"
 )
 
@@ -16,7 +15,7 @@ dagger.#Plan & {
                     "out"
                 ]
             }
-            "./out/coverage": write: contents: actions.coverage.copy.output
+            "./out/coverage": write: contents: actions.coverage.output
             "./out/build": write: contents: actions.build.run.output
             "./out/packages": write: contents: actions.diff.output
         }
@@ -34,6 +33,16 @@ dagger.#Plan & {
             source: client.filesystem.".".read.contents
         }
 
+        coverage: ci.#Coverage & {
+            source: client.filesystem.".".read.contents
+            packages: diff.packages
+        }
+
+        test: ci.#Test & {
+            source: client.filesystem.".".read.contents
+            packages: diff.packages
+        }
+
         build: {
             run: ci.#Build & {
                 source: client.filesystem.".".read.contents
@@ -41,27 +50,6 @@ dagger.#Plan & {
             }
         }
         
-        test: {
-            run: ci.#GoTestWithCoverage & {
-                source: client.filesystem.".".read.contents
-                packages: diff.packages
-            }
-        }
-
-        coverage: {
-            run: ci.#GoTestWithCoverage & {
-                source: client.filesystem.".".read.contents
-                packages: diff.packages
-                coverageOutput: "/tmp/coverage.out"
-            }
-
-            copy: core.#Copy & {
-                input:    dagger.#Scratch
-                contents: run.output.rootfs
-				source:   "/tmp/coverage.out"
-				dest:     "/"
-			}
-        }
 
         lint: ci.#Lint & {
             source: client.filesystem.".".read.contents

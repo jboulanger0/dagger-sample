@@ -1,25 +1,30 @@
 package ci
 
 import(
-    "universe.dagger.io/go"
+    "dagger.io/dagger"
 )
 
-#GoTestWithCoverage: {
-	packages: [...string] | *[..."."]
-    
-    coverageOutput?: string | "coverage.out"
+#Coverage: {
+	source: dagger.#FS
 
-	go.#Container & {
-		command: {
-			name: "go"
-			args: packages
-			flags: {
-				test: true
-				"-v": true
-                if coverageOutput != _|_ {
-                    "-coverprofile": coverageOutput
-                }
-			}
+	packages: [...string] | *["."]
+
+	_coverageOutputFolder: "/tmp"
+    _coverageOutputFilename: "coverage.out"
+	_coverageOutputPath: _coverageOutputFolder + "/" + _coverageOutputFilename
+	
+	_source: source
+	_packages: packages
+	_test: #Test & {
+		packages: _packages
+		source: _source
+		command: flags: _ & {
+			"-coverprofile": _coverageOutputPath
+		}
+		export: {
+			directories: "\(_coverageOutputFolder)": dagger.#FS
 		}
 	}
+
+	output: _test.export.directories[_coverageOutputFolder]
 }
