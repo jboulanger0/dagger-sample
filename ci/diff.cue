@@ -18,8 +18,7 @@ import(
     gtaVersion: string | *"latest"
 
     _outputFolder: "/tmp"
-    _outputFilename: "packages.json"
-    _outputPath: _outputFolder + "/" + _outputFilename
+    _outputPath: _outputFolder + "/packages.json"
     _image: docker.#Build & {
         steps:[
             go.#Image & {
@@ -51,8 +50,8 @@ import(
             }
 		}
         export: {
-            directories: "\(_outputFolder)": dagger.#FS
-            files: "\(_outputPath)": _
+            directories: (_outputFolder): dagger.#FS
+            files: (_outputPath): _
         }
     }
     

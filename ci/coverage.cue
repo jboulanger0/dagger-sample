@@ -8,11 +8,11 @@ import(
 	// Source code
 	source: dagger.#FS
 
+	// Target packages to evaluate coverage
 	packages: [...string] | *["."]
 
 	_coverageOutputFolder: "/tmp"
-    _coverageOutputFilename: "coverage.out"
-	_coverageOutputPath: _coverageOutputFolder + "/" + _coverageOutputFilename
+	_coverageOutputPath: _coverageOutputFolder + "/coverage.out"
 	
 	_source: source
 	_packages: packages
@@ -23,7 +23,7 @@ import(
 			"-coverprofile": _coverageOutputPath
 		}
 		export: {
-			directories: "\(_coverageOutputFolder)": dagger.#FS
+			directories: (_coverageOutputFolder): dagger.#FS
 		}
 	}
 

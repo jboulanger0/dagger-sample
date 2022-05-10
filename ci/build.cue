@@ -5,7 +5,7 @@ import(
     "dagger.io/dagger"
 )
 
-// forked from dagger universe.dagger.io/go
+// Forked from dagger universe.dagger.io/go
 #Build: {
 	// Source code
 	source: dagger.#FS
