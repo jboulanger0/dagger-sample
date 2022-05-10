@@ -1,40 +1,57 @@
 package main 
 
 import(
+    "strings"
     "dagger.io/dagger"
     "dagger.io/dagger/core"
-    "universe.dagger.io/go"
     "github.com/jboulanger0/dagger-sample/ci"
 )
 
 dagger.#Plan & {
     client: {
         filesystem: {
-            ".": read: contents: dagger.#FS 
+            ".": read: {
+                contents: dagger.#FS 
+                exclude: [
+                    "out"
+                ]
+            }
             "./out/coverage": write: contents: actions.coverage.copy.output
             "./out/build": write: contents: actions.build.run.output
+            "./out/packages": write: contents: actions.diff.output
         }
+
+        commands: {
+            moduleName: {
+                name: "go"
+                args: ["list", "-m"]
+            }
+        } 
     }
     
-    actions: {
+    actions: {  
+        diff: ci.#Diff & {
+            source: client.filesystem.".".read.contents
+        }
+
         build: {
-            run: go.#Build & {
+            run: ci.#Build & {
                 source: client.filesystem.".".read.contents
-                package: "./..."
+                packages: diff.allChanges
             }
         }
         
         test: {
             run: ci.#GoTestWithCoverage & {
                 source: client.filesystem.".".read.contents
-                package: "./..."
+                packages: diff.allChanges
             }
         }
 
         coverage: {
             run: ci.#GoTestWithCoverage & {
                 source: client.filesystem.".".read.contents
-                package: "./..."
+                packages: diff.allChanges
                 coverageOutput: "/tmp/coverage.out"
             }
 
@@ -49,8 +66,12 @@ dagger.#Plan & {
         lint: {
             run: ci.#GoLint & {
                 source: client.filesystem.".".read.contents
-                package: "./..."
+                packages: [
+                    for _, value in diff.allChanges { 
+                        strings.TrimPrefix(value, strings.TrimSpace(client.commands.moduleName.stdout)+"/")
+                    }
+                ]
             }
-        }
+        }   
     }
 }

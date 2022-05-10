@@ -5,14 +5,14 @@ import(
 )
 
 #GoTestWithCoverage: {
-	package: *"." | string
+	packages: [...string] | *[..."."]
     
     coverageOutput?: string | "coverage.out"
 
 	go.#Container & {
 		command: {
 			name: "go"
-			args: [package]
+			args: packages
 			flags: {
 				test: true
 				"-v": true

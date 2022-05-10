@@ -11,7 +11,7 @@ import(
 
 	source: dagger.#FS
 
-    package: string | *"."
+    packages: [...string] | *["."]
 
     _sourcePath:     "/src"
 
@@ -34,7 +34,7 @@ import(
         }
         command: {
 			name: "golangci-lint"
-			args: [package]
+			args: packages
 			flags: {
                 "run": true
             }
