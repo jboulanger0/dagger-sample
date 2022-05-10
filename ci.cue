@@ -16,7 +16,7 @@ dagger.#Plan & {
                 ]
             }
             "./out/coverage": write: contents: actions.coverage.output
-            "./out/build": write: contents: actions.build.run.output
+            "./out/build": write: contents: actions.build.output
             "./out/packages": write: contents: actions.diff.output
         }
 
@@ -43,14 +43,11 @@ dagger.#Plan & {
             packages: diff.packages
         }
 
-        build: {
-            run: ci.#Build & {
-                source: client.filesystem.".".read.contents
-                packages: diff.packages
-            }
+        build: ci.#Build & {
+            source: client.filesystem.".".read.contents
+            packages: diff.packages
         }
         
-
         lint: ci.#Lint & {
             source: client.filesystem.".".read.contents
             packages: [
