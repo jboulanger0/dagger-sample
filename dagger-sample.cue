@@ -63,15 +63,13 @@ dagger.#Plan & {
 			}
         }
 
-        lint: {
-            run: ci.#GoLint & {
-                source: client.filesystem.".".read.contents
-                packages: [
-                    for _, value in diff.packages { 
-                        strings.TrimPrefix(value, strings.TrimSpace(client.commands.moduleName.stdout)+"/")
-                    }
-                ]
-            }
+        lint: ci.#Lint & {
+            source: client.filesystem.".".read.contents
+            packages: [
+                for _, value in diff.packages { 
+                    strings.TrimPrefix(value, strings.TrimSpace(client.commands.moduleName.stdout)+"/")
+                }
+            ]
         }
     }
 }
