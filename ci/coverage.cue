@@ -5,6 +5,7 @@ import(
 )
 
 #Coverage: {
+	// Source code
 	source: dagger.#FS
 
 	packages: [...string] | *["."]
@@ -26,5 +27,6 @@ import(
 		}
 	}
 
+	// Directory containing coverage output
 	output: _test.export.directories[_coverageOutputFolder]
 }

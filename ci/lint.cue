@@ -8,10 +8,13 @@ import(
 )
 
 #Lint: {
+    // Golangci-lint image version
     version: string | *"1.45.2"
 
+    // Source code
 	source: dagger.#FS
 
+    // Target packages to lint
     packages: [...string] | *["."]
 
     _image: docker.#Pull & {

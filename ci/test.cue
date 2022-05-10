@@ -6,8 +6,10 @@ import(
 )
 
 #Test: {
+	// Source code
 	source: dagger.#FS
 
+	// Target packages to test
 	packages: [...string] | *["."]
     
 	go.#Container & {

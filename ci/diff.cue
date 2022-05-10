@@ -11,10 +11,10 @@ import(
 // Diff is based on gta is an application which finds Go packages that have deviated from their upstream source in git.
 // https://github.com/digitalocean/gta
 #Diff: {
+    // Source code
     source: dagger.#FS
-    
-    package?: string
 
+    // Gta image version
     gtaVersion: string | *"latest"
 
     _outputFolder: "/tmp"
@@ -57,7 +57,10 @@ import(
     }
     
     _packages: {[string]: {[string]: [...string]} | [...string]} & json.Unmarshal(_run.export.files[_outputPath])  
+    
+    // Go packages impacted by diff
     packages: _packages["all_changes"] | _|_
 
+    // Directory containing gta output 
     output: _run.export.directories[_outputFolder]
 }
