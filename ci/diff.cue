@@ -55,13 +55,9 @@ import(
             files: "\(_outputPath)": _
         }
     }
-
-    _raw_json: _run.export.files[_outputPath]
-    packages: {[string]: {[string]: [...string]} | [...string]} & json.Unmarshal(_raw_json)  
     
-    allChanges: packages["all_changes"]
-    dependencies: packages["dependencies"]
-    changes: packages["changes"]
+    _packages: {[string]: {[string]: [...string]} | [...string]} & json.Unmarshal(_run.export.files[_outputPath])  
+    packages: _packages["all_changes"] | _|_
 
     output: _run.export.directories[_outputFolder]
 }

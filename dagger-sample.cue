@@ -37,21 +37,21 @@ dagger.#Plan & {
         build: {
             run: ci.#Build & {
                 source: client.filesystem.".".read.contents
-                packages: diff.allChanges
+                packages: diff.packages
             }
         }
         
         test: {
             run: ci.#GoTestWithCoverage & {
                 source: client.filesystem.".".read.contents
-                packages: diff.allChanges
+                packages: diff.packages
             }
         }
 
         coverage: {
             run: ci.#GoTestWithCoverage & {
                 source: client.filesystem.".".read.contents
-                packages: diff.allChanges
+                packages: diff.packages
                 coverageOutput: "/tmp/coverage.out"
             }
 
@@ -67,11 +67,11 @@ dagger.#Plan & {
             run: ci.#GoLint & {
                 source: client.filesystem.".".read.contents
                 packages: [
-                    for _, value in diff.allChanges { 
+                    for _, value in diff.packages { 
                         strings.TrimPrefix(value, strings.TrimSpace(client.commands.moduleName.stdout)+"/")
                     }
                 ]
             }
-        }   
+        }
     }
 }
