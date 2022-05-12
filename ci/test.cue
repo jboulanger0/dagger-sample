@@ -1,7 +1,9 @@
 package ci
 
 import(
-    "dagger.io/dagger"
+	//"encoding/json"
+	"dagger.io/dagger"
+	//"dagger.io/dagger/core"
     "universe.dagger.io/go"
 )
 
@@ -11,9 +13,9 @@ import(
 
 	// Target packages to test
 	packages: [...string] | *["."]
-    
+	
 	go.#Container & {
-		source: source
+		"source": source
 		command: {
 			name: "go"
 			args: packages

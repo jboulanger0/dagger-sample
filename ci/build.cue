@@ -49,7 +49,7 @@ import(
 				"-o":       "/output/"
 			}
 		}
-		export: directories: "/output": _
+		export: directories: "/output": dagger.#FS
 	}
 
 	// Directory containing the output of the build

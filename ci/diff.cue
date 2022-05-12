@@ -7,7 +7,6 @@ import(
     "universe.dagger.io/docker"
 )
 
-
 // Diff is based on gta is an application which finds Go packages that have deviated from their upstream source in git.
 // https://github.com/digitalocean/gta
 #Diff: {
@@ -15,17 +14,13 @@ import(
     source: dagger.#FS
 
     // Gta image version
-    gtaVersion: string | *"latest"
+    gtaVersion: string | *"4d63958"
 
     _outputFolder: "/tmp"
     _outputPath: _outputFolder + "/packages.json"
     _image: docker.#Build & {
         steps:[
-            go.#Image & {
-                packages: _ & {
-                    jq : _
-                }
-            },
+            go.#Image,
             docker.#Run & { 
                 command: {
                     name: "go"
@@ -38,10 +33,9 @@ import(
         ]
 
     }
-    
-    _source: source
+
     _run: go.#Container & {
-        source: _source
+        "source": source
         input: _image.output
         command: {
 			name: "sh"
@@ -51,7 +45,7 @@ import(
 		}
         export: {
             directories: (_outputFolder): dagger.#FS
-            files: (_outputPath): _
+            files: (_outputPath): string
         }
     }
     

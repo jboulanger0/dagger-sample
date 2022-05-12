@@ -29,8 +29,14 @@ dagger.#Plan & {
     }
     
     actions: {  
-        diff: ci.#Diff & {
-            source: client.filesystem.".".read.contents
+        diff: {
+            _op: ci.#Diff & {
+                source: client.filesystem.".".read.contents
+            }
+
+            packages: _op.packages
+            output: _op.output
+            results: strings.Join(packages, ",")
         }
 
         coverage: ci.#Coverage & {
@@ -43,9 +49,18 @@ dagger.#Plan & {
             packages: diff.packages
         }
 
-        build: ci.#Build & {
-            source: client.filesystem.".".read.contents
-            packages: diff.packages
+        build: {
+            _op: ci.#Build & {
+                source: client.filesystem.".".read.contents
+                packages: diff.packages
+            }
+
+            _binaries: ci.#ListFile & {
+                input: _op.output  
+            }
+
+            output: _op.output
+            results: strings.Join(_binaries.files, ",")
         }
         
         lint: ci.#Lint & {
