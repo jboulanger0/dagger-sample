@@ -6,7 +6,7 @@ on:
 
 jobs:
 
-  lint:
+  quality:
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
@@ -15,7 +15,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
-      - name: Dagger do test
+      - name: Dagger do lint
         uses: dagger/dagger-for-github@v3
         with:
           workdir: 
@@ -40,3 +40,21 @@ jobs:
           cmds: |
             project update
             do test
+
+  build:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Clone repository
+          uses: actions/checkout@v3
+          with:
+            ref: ${{ github.event.pull_request.head.sha }}
+            fetch-depth: 0
+
+        - name: Dagger do build
+          uses: dagger/dagger-for-github@v3
+          with:
+            workdir: 
+            version: 0.2
+            cmds: |
+              project update
+              do build
