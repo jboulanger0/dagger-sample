@@ -1,7 +1,7 @@
 package printer
 
-import "fmt"
+import "log"
 
-func Println(in string) (n int, err error) {
-	return fmt.Println(in)
+func Println(in string) {
+	log.Println(in)
 }
