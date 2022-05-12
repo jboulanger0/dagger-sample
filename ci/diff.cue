@@ -38,11 +38,11 @@ import(
         "source": source
         input: _image.output
         command: {
-			name: "sh"
+            name: "sh"
             flags: {
                 "-c": "gta -json --buildable-only=false -base origin/main >> \(_outputPath)"
             }
-		}
+        }
         export: {
             directories: (_outputFolder): dagger.#FS
             files: (_outputPath): string
