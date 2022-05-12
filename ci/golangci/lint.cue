@@ -42,7 +42,7 @@ import (
 
 	_packages: [
 		for _, value in packages {
-			strings.Replace(strings.Replace(value, "github.com/jboulanger0/project-sample", "./", 1), "//", "/", 1)
+			strings.Replace(strings.Replace(value, strings.TrimSpace(_gomodule.output), "./", 1), "//", "/", 1)
 		},
 	]
 
