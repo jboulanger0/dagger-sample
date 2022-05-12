@@ -1,0 +1,1 @@
+module: "github.com/jboulanger0/dagger-sample"
