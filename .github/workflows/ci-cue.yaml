@@ -1,0 +1,35 @@
+name: ci-cue
+
+on:
+  push:
+    paths:
+      - "**.cue"
+    branches:
+      - main
+  pull_request:
+    paths:
+      - "**.cue"
+    branches:
+      - main
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+        fetch-depth: 0
+
+    - name: Lint
+      uses: dagger/dagger-for-github@v3
+      env:
+        DAGGER_LOG_LEVEL: "debug"
+        DAGGER_LOG_FORMAT: "plain"
+        DAGGER_CACHE_TO: "type=gha,mode=max,scope=ci-cue-lint"
+        DAGGER_CACHE_FROM: "type=gha,scope=ci-cue-lint"
+      with:
+        cmds: |
+          project update
+          do checks lint cue

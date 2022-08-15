@@ -1,0 +1,198 @@
+name: ci-go
+
+on:
+  push:
+    paths:
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+    branches:
+      - main
+  pull_request:
+    paths:
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+    branches:
+      - main
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    env:
+      DAGGER_LOG_FORMAT: plain
+      DAGGER_LOG_LEVEL: debug
+      DAGGER_CACHE_BASE: ci-quality
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Expose GitHub Runtime
+        uses: crazy-max/ghaction-github-runtime@v2
+
+      - name: Go vendor cache
+        id: cache-vendor
+        uses: actions/cache@v2
+        with:
+          path: "./vendor"
+          key: ${{ runner.os }}-vendor-${{ hashFiles('**/go.sum') }}
+
+      - name: Setup Go
+        if: steps.cache-vendor.outputs.cache-hit != 'true'
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - name: Setup Go mod for diff compute
+        if: steps.cache-vendor.outputs.cache-hit != 'true'
+        run: |
+          go mod vendor
+
+      - name: Install Dagger
+        uses: dagger/dagger-action@v3
+        with:
+          install-only: true
+
+      - name: Sets env vars on push to main
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        run: |
+          echo "DAGGER_CACHE_TO=type=gha,mode=max,scope=${{env.DAGGER_CACHE_BASE}}-main" >> $GITHUB_ENV
+          echo "DAGGER_CACHE_FROM=type=gha,scope=${{env.DAGGER_CACHE_BASE}}-main" >> $GITHUB_ENV
+
+      - name: Sets env vars on pull request
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          echo "DAGGER_CACHE_TO=type=gha,mode=max,scope=${{env.DAGGER_CACHE_BASE}}-${{github.event.number}}" >> $GITHUB_ENV
+          echo "DAGGER_CACHE_FROM=type=gha,scope=${{env.DAGGER_CACHE_BASE}}-main type=gha,scope=${{env.DAGGER_CACHE_BASE}}-${{github.event.number}}" >> $GITHUB_ENV
+
+      - name: Dagger project update
+        shell: bash
+        run: |
+          dagger project update
+
+      - name: Dagger do lint
+        run: |
+          dagger do -w 'actions:params:enableDiffUsage:true' checks lint go
+
+  test:
+    runs-on: ubuntu-latest
+    env:
+      DAGGER_LOG_FORMAT: plain
+      DAGGER_LOG_LEVEL: debug
+      DAGGER_CACHE_BASE: ci-test
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Expose GitHub Runtime
+        uses: crazy-max/ghaction-github-runtime@v2
+
+      - name: Go vendor cache
+        id: cache-vendor
+        uses: actions/cache@v2
+        with:
+          path: "./vendor"
+          key: ${{ runner.os }}-vendor-${{ hashFiles('**/go.sum') }}
+
+      - name: Setup Go
+        if: steps.cache-vendor.outputs.cache-hit != 'true'
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - name: Setup Go mod for diff compute
+        if: steps.cache-vendor.outputs.cache-hit != 'true'
+        run: |
+          go mod vendor
+
+      - name: Install Dagger
+        uses: dagger/dagger-action@v3
+        with:
+          install-only: true
+
+      - name: Sets env vars on push to main
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        run: |
+          echo "DAGGER_CACHE_TO=type=gha,mode=max,scope=${{env.DAGGER_CACHE_BASE}}-main" >> $GITHUB_ENV
+          echo "DAGGER_CACHE_FROM=type=gha,scope=${{env.DAGGER_CACHE_BASE}}-main" >> $GITHUB_ENV
+
+      - name: Sets env vars on pull request
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          echo "DAGGER_CACHE_TO=type=gha,mode=max,scope=${{env.DAGGER_CACHE_BASE}}-${{github.event.number}}" >> $GITHUB_ENV
+          echo "DAGGER_CACHE_FROM=type=gha,scope=${{env.DAGGER_CACHE_BASE}}-main type=gha,scope=${{env.DAGGER_CACHE_BASE}}-${{github.event.number}}" >> $GITHUB_ENV
+
+      - name: Dagger project update
+        run: |
+          dagger project update
+
+      - name: Dagger do test
+        run: |
+          dagger do -w 'actions:params:enableDiffUsage:true' checks test
+
+  build:
+    runs-on: ubuntu-latest
+    env:
+      DAGGER_LOG_FORMAT: plain
+      DAGGER_LOG_LEVEL: debug
+      DAGGER_CACHE_BASE: ci-build
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Expose GitHub Runtime
+        uses: crazy-max/ghaction-github-runtime@v2
+
+      - name: Go vendor cache
+        id: cache-vendor
+        uses: actions/cache@v2
+        with:
+          path: "./vendor"
+          key: ${{ runner.os }}-vendor-${{ hashFiles('**/go.sum') }}
+
+      - name: Setup Go
+        if: steps.cache-vendor.outputs.cache-hit != 'true'
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - name: Setup Go mod for diff compute
+        if: steps.cache-vendor.outputs.cache-hit != 'true'
+        run: |
+          go mod vendor
+      - name: Install Dagger
+        uses: dagger/dagger-action@v3
+        with:
+          install-only: true
+
+      - name: Sets env vars on push to main
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        run: |
+          echo "DAGGER_CACHE_TO=type=gha,mode=max,scope=${{env.DAGGER_CACHE_BASE}}-main" >> $GITHUB_ENV
+          echo "DAGGER_CACHE_FROM=type=gha,scope=${{env.DAGGER_CACHE_BASE}}-main" >> $GITHUB_ENV
+
+      - name: Sets env vars on pull request
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          echo "DAGGER_CACHE_TO=type=gha,mode=max,scope=${{env.DAGGER_CACHE_BASE}}-${{github.event.number}}" >> $GITHUB_ENV
+          echo "DAGGER_CACHE_FROM=type=gha,scope=${{env.DAGGER_CACHE_BASE}}-main type=gha,scope=${{env.DAGGER_CACHE_BASE}}-${{github.event.number}}" >> $GITHUB_ENV
+
+      - name: Dagger project update
+        run: |
+          dagger project update
+
+      - name: Dagger do checks build
+        run: |
+          dagger do -w 'actions:params:enableDiffUsage:true' checks build
