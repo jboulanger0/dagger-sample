@@ -24,12 +24,20 @@ dagger.#Plan & {
 	}
 
 	actions: {
-		params: enableDiffUsage: bool | *false
+		params: useDiffFrom?: gta.#DiffFrom
+		_useDiffFrom: params.useDiffFrom
 
 		_source: client.filesystem["."].read.contents
+
 		diff: {
+			from: *gta.#DiffFromMain | gta.#DiffFrom
+			if _useDiffFrom != _|_ {
+				from: _useDiffFrom
+			}
+
 			_op: gta.#Diff & {
 				source: _source
+				"from": from
 			}
 			output:  _op.output
 			results: strings.Join(output, ",")
@@ -37,7 +45,7 @@ dagger.#Plan & {
 
 		checks: {
 			_packages: *["./..."] | [...string]
-			if params.enableDiffUsage {
+			if _useDiffFrom != _|_ {
 				_packages: diff.output
 			}
 
