@@ -74,9 +74,16 @@ jobs:
         run: |
           dagger project update
 
-      - name: Dagger do lint
+      - name: Dagger do checks build from main
+        if: ${{ github.event_name == 'pull_request' }}
         run: |
-          dagger do -w 'actions:params:enableDiffUsage:true' checks lint go
+          dagger do -w 'actions:params:useDiffFrom:"main"' checks lint go
+      
+
+      - name: Dagger do checks build from merge
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          dagger do -w 'actions:params:useDiffFrom:"merge"' checks lint go
 
   test:
     runs-on: ubuntu-latest
@@ -134,9 +141,15 @@ jobs:
         run: |
           dagger project update
 
-      - name: Dagger do test
+      - name: Dagger do checks build from main
+        if: ${{ github.event_name == 'pull_request' }}
         run: |
-          dagger do -w 'actions:params:enableDiffUsage:true' checks test
+          dagger do -w 'actions:params:useDiffFrom:"main"' checks test
+      
+      - name: Dagger do checks build from merge
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          dagger do -w 'actions:params:useDiffFrom:"merge"' checks test
 
   build:
     runs-on: ubuntu-latest
@@ -193,6 +206,12 @@ jobs:
         run: |
           dagger project update
 
-      - name: Dagger do checks build
+      - name: Dagger do checks build from main
+        if: ${{ github.event_name == 'pull_request' }}
         run: |
-          dagger do -w 'actions:params:enableDiffUsage:true' checks build
+          dagger do -w 'actions:params:useDiffFrom:"main"' checks build
+      
+      - name: Dagger do checks build from merge
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          dagger do -w 'actions:params:useDiffFrom:"merge"' checks build
